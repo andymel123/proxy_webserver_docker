@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+   web:
+     container_name: webs
+     build: 
+        context: .
+        dockerfile: ./dockerfile_apache
+     ports:
+      - "81:80"
+     volumes:
+      - ./html/:/var/www/html/
+      - ./logs/apache/:/var/log/apache/
+      - ./config/apache2.conf:/etc/apache2/apache2.conf
+      - ./config/apache_php.ini:/etc/php5/apache2/php.ini
+     networks:
+      - no-internet
+#      - internet
+      
+   proxy:
+     image: nginx:1.13-alpine 
+     container_name: prox
+     depends_on:
+      - web
+     networks:
+      - internet
+      - no-internet
+     volumes:
+      - ./config/nginx_proxy.conf:/etc/nginx/conf.d/default.conf
+      - ./logs/nginx/:/var/log/nginx/
+     ports:
+      - "80:80"
+     command: [nginx-debug, '-g', 'daemon off;']
+     
+
+  # Containers can reach each other over 'no-internet'
+  # Just the proxy is in the 'internet' network, that is 
+  # connected to the docker host
+  # inspired by https://stackoverflow.com/a/47008421/7869582
+  
+networks:
+  internet:
+  no-internet:
+    internal: true

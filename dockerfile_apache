@@ -1,0 +1,15 @@
+FROM orsolin/docker-php-5.3-apache
+RUN apt-get update
+RUN apt-get install nano
+
+
+
+
+#------------------------------
+# to fix "debconf: delaying package configuration, since apt-utils is not installed"
+# written during build with orsolin/docker-php-5.3-apache image
+# https://github.com/phusion/baseimage-docker/issues/319
+RUN apt-get install -y --no-install-recommends apt-utils
+
+# the above line leads to "unable to initialize frontend: Dialog"...and more warnings
+ENV DEBIAN_FRONTEND teletype
